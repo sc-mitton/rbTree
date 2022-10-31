@@ -1,12 +1,15 @@
 package com.rbtree;
 
 import java.lang.Comparable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
 
 // TO DO : Learn how to add docstrings, and then test this datastructure
 
+/**
+ * An implimentation of a red black tree i.e. a type of self balancing binary
+ * search tree
+ * 
+ * @author spencermitton
+ */
 public class RedBlackTree<T extends Comparable<T>> {
   private Node root;
 
@@ -33,6 +36,14 @@ public class RedBlackTree<T extends Comparable<T>> {
   }
 
   // Main Data Structure Methods
+
+  /**
+   * <p>
+   * Insert data into the tree.
+   * </p>
+   * 
+   * @param data data to be inserted to the tree
+   */
   public void insert(T data) {
 
     if (root == null) {
@@ -55,6 +66,13 @@ public class RedBlackTree<T extends Comparable<T>> {
 
   }
 
+  /**
+   * Get an item out of the tree.
+   * 
+   * @param val item being searched for
+   * @return the node in the tree where the data is at, or null if the data is not
+   *         in the tree
+   */
   public Node get(T val) {
 
     Node current = root;
@@ -72,6 +90,11 @@ public class RedBlackTree<T extends Comparable<T>> {
     return current;
   }
 
+  /**
+   * Deletes an item from the tree.
+   * 
+   * @param val item to be deleted
+   */
   public void delete(T val) {
 
     Node node = get(val);
@@ -341,11 +364,6 @@ public class RedBlackTree<T extends Comparable<T>> {
 
   }
 
-  private Node sybling(Node node) {
-    Node sybling = (node.parent.rightNode == node) ? node.parent.leftNode : node.parent.rightNode;
-    return sybling;
-  }
-
   private void traverse(Node node) {
     // Depth first search
 
@@ -387,6 +405,9 @@ public class RedBlackTree<T extends Comparable<T>> {
 
   }
 
+  /**
+   * Prints out the data in the tree in order.
+   */
   public void inOrderTraversal() {
     // Traverse tree in order
     System.out.print("\n");
