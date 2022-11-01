@@ -5,7 +5,7 @@ import java.util.Random;
 public class Driver {
   public static void main(String[] args) {
 
-    Integer[] vals = new Integer[30];
+    Integer[] vals = new Integer[12];
     RedBlackTree<Integer> rbTree = new RedBlackTree<>();
     Random rand = new Random();
     rand.setSeed(3);
@@ -34,6 +34,7 @@ public class Driver {
       rbTree.insert(vals[i]);
     }
 
+    System.out.print("\n");
     System.out.println(rbTree);
 
   }

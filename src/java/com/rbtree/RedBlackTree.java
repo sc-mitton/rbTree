@@ -1,6 +1,10 @@
 package com.rbtree;
 
 import java.lang.Comparable;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Stack;
 
 /**
  * An implimentation of a red black tree i.e. a type of self balancing binary
@@ -378,25 +382,43 @@ public class RedBlackTree<T extends Comparable<T>> {
     }
   }
 
-  private StringBuilder breadthFirst(Node node, int space, StringBuilder sb) {
+  private LinkedHashMap<Node, String> toStringHelper(Stack<Node> stack,
+      LinkedHashMap<Node, String> treeItems) {
 
-    if (node != null) {
-      space += 10;
-      sb = breadthFirst(node.rightNode, space, sb);
-      sb.append("\n");
-      for (int i = 10; i < space; i++) {
-        sb.append(" ");
-      }
-      if (node.red) {
-        sb.append("\u001b[31m" + node.data + "\u001b[37m");
-      } else {
-        sb.append(node.data);
-      }
-      sb.append("\n");
-      sb = breadthFirst(node.leftNode, space, sb);
+    // Base case
+    if (stack.empty()) {
+      return treeItems;
     }
 
-    return sb;
+    Node node = stack.pop();
+    String nodeString = node.data.toString();
+
+    String s = node.red ? String.format(" \u001b[31m%s\u001b[37m ", nodeString)
+        : String.format(" %s ", nodeString);
+
+    // for (Map.Entry<Node, String> entry : treeItems.entrySet()) {
+
+    // if (node.data.compareTo(entry.getKey().data) < 0) {
+    // String newValue = " ".repeat(nodeString.length()) + entry.getValue();
+    // treeItems.put(entry.getKey(), newValue);
+    // } else {
+    // String newValue = entry.getValue() + " ".repeat(nodeString.length());
+    // treeItems.put(entry.getKey(), newValue);
+    // }
+
+    // }
+
+    treeItems.put(node, s);
+
+    if (node.leftNode != null) {
+      stack.push(node.leftNode);
+    }
+
+    if (node.rightNode != null) {
+      stack.push(node.rightNode);
+    }
+
+    return toStringHelper(stack, treeItems);
 
   }
 
@@ -411,8 +433,21 @@ public class RedBlackTree<T extends Comparable<T>> {
 
   @Override
   public String toString() {
+
+    Stack<Node> stack = new Stack<>();
+    stack.push(root);
+    LinkedHashMap<Node, String> treeItems = new LinkedHashMap<>();
+    treeItems = toStringHelper(stack, treeItems);
+
     StringBuilder sb = new StringBuilder();
-    sb = breadthFirst(root, 0, sb);
+    Node previous = root;
+    for (Map.Entry<Node, String> entry : treeItems.entrySet()) {
+      if (entry.getKey().data.compareTo(previous.data) < 0) {
+        sb.append("\n");
+      }
+      sb.append(entry.getValue());
+      previous = entry.getKey();
+    }
 
     return sb.toString();
   }
