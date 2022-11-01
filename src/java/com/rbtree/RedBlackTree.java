@@ -2,8 +2,6 @@ package com.rbtree;
 
 import java.lang.Comparable;
 
-// TO DO : Learn how to add docstrings, and then test this datastructure
-
 /**
  * An implimentation of a red black tree i.e. a type of self balancing binary
  * search tree
@@ -298,8 +296,6 @@ public class RedBlackTree<T extends Comparable<T>> {
 
   private Node rotateRight(Node rotatingNode) {
 
-    // Has to be done in the right order
-
     // Step 1: Reconnect grandparent and rotating node
     Node p = rotatingNode.parent;
     rotatingNode.parent = p.parent;
@@ -328,7 +324,6 @@ public class RedBlackTree<T extends Comparable<T>> {
   }
 
   private Node rotateLeft(Node rotatingNode) {
-    // Has to be done in the right order
 
     // Step 1: Reconnect grandparent and rotating node
     Node p = rotatingNode.parent;
@@ -417,7 +412,7 @@ public class RedBlackTree<T extends Comparable<T>> {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb = breadthFirst(root, 5, sb);
+    sb = breadthFirst(root, 0, sb);
 
     return sb.toString();
   }

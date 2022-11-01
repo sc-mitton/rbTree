@@ -34,7 +34,6 @@ public class Driver {
       rbTree.insert(vals[i]);
     }
 
-    rbTree.delete(19);
     System.out.println(rbTree);
 
   }
