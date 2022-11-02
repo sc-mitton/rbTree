@@ -1,9 +1,12 @@
 package com.rbtree;
 
 import java.lang.Comparable;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Stack;
 
 /**
@@ -15,8 +18,11 @@ import java.util.Stack;
 public class RedBlackTree<T extends Comparable<T>> {
   private Node root;
 
+  private int nodeCount;
+
   public RedBlackTree() {
     root = null;
+    nodeCount = 0;
   }
 
   // Internal class
@@ -37,7 +43,28 @@ public class RedBlackTree<T extends Comparable<T>> {
 
   }
 
-  // Main Data Structure Methods
+  public Node getRoot() {
+    return root;
+  }
+
+  public int getNodeCount() {
+    return nodeCount;
+  }
+
+  public void getNodeCount(int size) {
+    this.nodeCount = size;
+  }
+
+  public Node getMax() {
+    Node node = root;
+
+    while (node != null) {
+      node = node.rightNode;
+    }
+
+    return node != null ? node.parent : node;
+
+  }
 
   /**
    * <p>
@@ -47,6 +74,7 @@ public class RedBlackTree<T extends Comparable<T>> {
    * @param data data to be inserted to the tree
    */
   public void insert(T data) {
+    size += 1;
 
     if (root == null) {
       root = new Node(data, false);
@@ -64,6 +92,83 @@ public class RedBlackTree<T extends Comparable<T>> {
         refresh(newNode);
       }
 
+    }
+
+  }
+
+  private Node insertHelper(Node node, Node newNode) {
+    // Find the parent of the node to be inserted
+
+    Node previousNode = null;
+    Node currentNode = node;
+    while (currentNode != null) {
+
+      if (newNode.data.compareTo(currentNode.data) < 0) {
+        previousNode = currentNode;
+        currentNode = currentNode.leftNode;
+      } else if (newNode.data.compareTo(currentNode.data) > 0) {
+        previousNode = currentNode;
+        currentNode = currentNode.rightNode;
+      } else {
+        break; // No duplicates in rb trees
+      }
+
+    }
+
+    return previousNode;
+  }
+
+  private void refresh(Node current) {
+
+    while (current != root && current.parent.red) {
+      Node uncle = uncle(current);
+      if (uncle != null && uncle.red) {
+        // Case 1: both parent and uncle are red
+        // Change the uncle and parent to black, the gradfather to red, and set the
+        // current node to the grandparent
+        current.parent.red = false;
+        uncle.red = false;
+        current.parent.parent.red = true;
+        current = current.parent.parent;
+      } else if ((uncle == null || !uncle.red)
+          && (current.parent.leftNode == current
+              && current.parent.parent.leftNode == current.parent)) {
+        // Case 2: black uncle, parent & current are left children
+        // Recolor current's grandparent to red, current's parent to black
+        // Right fotate current
+        if (current.parent.parent == root) {
+          root = current.parent;
+        }
+        current.parent.parent.red = true;
+        current.parent.red = false;
+        rotateRight(current.parent);
+      } else if ((uncle == null || !uncle.red)
+          && (current.parent.rightNode == current
+              && current.parent.parent.rightNode == current.parent)) {
+        // Case 3: Mirror of case 2
+        // Black uncle, parent & current are right children
+        // Recolor current's gradparent to red, current's parent to black
+        if (current.parent.parent == root) {
+          root = current.parent;
+        }
+        current.parent.parent.red = true;
+        current.parent.red = false;
+        rotateLeft(current.parent);
+      } else if ((uncle == null || !uncle.red)
+          && (current.parent.rightNode == current
+              && current.parent.parent.leftNode == current.parent)) {
+        // Case 4: Black uncle, current is right child, & current's parent is left child
+        current = rotateLeft(current);
+      } else if ((uncle == null || !uncle.red)
+          && (current.parent.leftNode == current
+              && current.parent.parent.rightNode == current.parent)) {
+        // Case 5: Mirror of case 4
+        current = rotateRight(current);
+      }
+    }
+
+    if (current == root) {
+      current.red = false;
     }
 
   }
@@ -145,84 +250,6 @@ public class RedBlackTree<T extends Comparable<T>> {
     node = null; // Delete for good
   }
 
-  // Helper methods
-  private Node insertHelper(Node node, Node newNode) {
-    // Find the parent of the node to be inserted
-
-    Node previousNode = null;
-    Node currentNode = node;
-    while (currentNode != null) {
-
-      if (newNode.data.compareTo(currentNode.data) < 0) {
-        previousNode = currentNode;
-        currentNode = currentNode.leftNode;
-      } else if (newNode.data.compareTo(currentNode.data) > 0) {
-        previousNode = currentNode;
-        currentNode = currentNode.rightNode;
-      } else {
-        break; // No duplicates in rb trees
-      }
-
-    }
-
-    return previousNode;
-  }
-
-  private void refresh(Node current) {
-
-    while (current != root && current.parent.red) {
-      Node uncle = uncle(current);
-      if (uncle != null && uncle.red) {
-        // Case 1: both parent and uncle are red
-        // Change the uncle and parent to black, the gradfather to red, and set the
-        // current node to the grandparent
-        current.parent.red = false;
-        uncle.red = false;
-        current.parent.parent.red = true;
-        current = current.parent.parent;
-      } else if ((uncle == null || !uncle.red)
-          && (current.parent.leftNode == current
-              && current.parent.parent.leftNode == current.parent)) {
-        // Case 2: black uncle, parent & current are left children
-        // Recolor current's grandparent to red, current's parent to black
-        // Right fotate current
-        if (current.parent.parent == root) {
-          root = current.parent;
-        }
-        current.parent.parent.red = true;
-        current.parent.red = false;
-        rotateRight(current.parent);
-      } else if ((uncle == null || !uncle.red)
-          && (current.parent.rightNode == current
-              && current.parent.parent.rightNode == current.parent)) {
-        // Case 3: Mirror of case 2
-        // Black uncle, parent & current are right children
-        // Recolor current's gradparent to red, current's parent to black
-        if (current.parent.parent == root) {
-          root = current.parent;
-        }
-        current.parent.parent.red = true;
-        current.parent.red = false;
-        rotateLeft(current.parent);
-      } else if ((uncle == null || !uncle.red)
-          && (current.parent.rightNode == current
-              && current.parent.parent.leftNode == current.parent)) {
-        // Case 4: Black uncle, current is right child, & current's parent is left child
-        current = rotateLeft(current);
-      } else if ((uncle == null || !uncle.red)
-          && (current.parent.leftNode == current
-              && current.parent.parent.rightNode == current.parent)) {
-        // Case 5: Mirror of case 4
-        current = rotateRight(current);
-      }
-    }
-
-    if (current == root) {
-      current.red = false;
-    }
-
-  }
-
   private void deleteFix(Node u, boolean db) {
     // u: replacement node, unless db = true, then u is the old node
     // db: true if replacement node is double black, meaning both it and the node
@@ -298,6 +325,14 @@ public class RedBlackTree<T extends Comparable<T>> {
 
   }
 
+  private Node inorderSuccessor(Node node) {
+    if (node.leftNode == null) {
+      return node;
+    } else {
+      return inorderSuccessor(node.leftNode);
+    }
+  }
+
   private Node rotateRight(Node rotatingNode) {
 
     // Step 1: Reconnect grandparent and rotating node
@@ -363,93 +398,102 @@ public class RedBlackTree<T extends Comparable<T>> {
 
   }
 
-  private void traverse(Node node) {
+  /**
+   * Prints out the data in the tree in order.
+   * 
+   * @return s: all of the data in the tree listed in order
+   */
+  public String inOrderTraversal() {
+    // Traverse tree in order
+    StringBuilder sb = new StringBuilder();
+    String s = depthFirst(root, sb);
+
+    return s;
+  }
+
+  private String depthFirst(Node node, StringBuilder sb) {
     // Depth first search
 
     if (node != null) {
-      traverse(node.leftNode);
-      System.out.printf("%d ", node.data);
-      traverse(node.rightNode);
+      depthFirst(node.leftNode, sb);
+      sb.append(node.data);
+      sb.append(" ");
+      depthFirst(node.rightNode, sb);
     }
 
-  }
-
-  private Node inorderSuccessor(Node node) {
-    if (node.leftNode == null) {
-      return node;
-    } else {
-      return inorderSuccessor(node.leftNode);
-    }
-  }
-
-  private LinkedHashMap<Node, String> toStringHelper(Stack<Node> stack,
-      LinkedHashMap<Node, String> treeItems) {
-
-    // Base case
-    if (stack.empty()) {
-      return treeItems;
-    }
-
-    Node node = stack.pop();
-    String nodeString = node.data.toString();
-
-    String s = node.red ? String.format(" \u001b[31m%s\u001b[37m ", nodeString)
-        : String.format(" %s ", nodeString);
-
-    // for (Map.Entry<Node, String> entry : treeItems.entrySet()) {
-
-    // if (node.data.compareTo(entry.getKey().data) < 0) {
-    // String newValue = " ".repeat(nodeString.length()) + entry.getValue();
-    // treeItems.put(entry.getKey(), newValue);
-    // } else {
-    // String newValue = entry.getValue() + " ".repeat(nodeString.length());
-    // treeItems.put(entry.getKey(), newValue);
-    // }
-
-    // }
-
-    treeItems.put(node, s);
-
-    if (node.leftNode != null) {
-      stack.push(node.leftNode);
-    }
-
-    if (node.rightNode != null) {
-      stack.push(node.rightNode);
-    }
-
-    return toStringHelper(stack, treeItems);
-
+    return sb.toString();
   }
 
   /**
-   * Prints out the data in the tree in order.
+   * Obtains a string representation of the subtree and the relationships between
+   * nodes.
+   * 
+   * @param val the root node of the subtree
+   * @return a string of node values and branches
    */
-  public void inOrderTraversal() {
-    // Traverse tree in order
-    System.out.print("\n");
-    traverse(root);
+  public String subTree(T val) {
+
+    // Get a list of nodes as they appear left to right
+    Node node = get(val);
+    ArrayDeque<Node> deque = new ArrayDeque<>();
+    deque.push(node);
+    List<Node> treeItems = new ArrayList<>();
+    treeItems = breadthFirst(deque, treeItems);
+
+    int cellSize = getMax().data.toString().length();
+    int rowSize = getNodeCount();
+    String row = " ";
+
+    StringBuilder sb = new StringBuilder();
+    for (Node treeItem : treeItems) {
+
+      sb.append(row.repeat((rowSize + 1) / 2));
+      String s = treeItem.red ? String.format("\u001b[31m%s\u001b[37m", treeItem.data)
+          : String.format("\u001b[31m%s\u001b[37m", treeItem.data);
+      sb.append(" ".repeat((cellSize + 1 - s.length()) / 2));
+      sb.append(s);
+      sb.append(" ".repeat((cellSize + 1 - s.length()) / 2));
+      sb.append(row.repeat((rowSize + 1) / 2));
+
+      sb.append(" ".repeat((cellSize + 1 - s.length()) / 2));
+      sb.append("|");
+      sb.append(" ".repeat((cellSize + 1 - s.length()) / 2));
+      sb.append(row.repeat((rowSize + 1) / 2));
+
+      rowSize = rowSize / 2;
+
+    }
+
+    return sb.toString();
+  }
+
+  private List<Node> breadthFirst(ArrayDeque<Node> deque,
+      List<Node> treeItems) {
+
+    // Base case
+    if (deque.isEmpty()) {
+      return treeItems;
+    }
+
+    Node node = deque.removeLast();
+    treeItems.add(node);
+
+    if (node.leftNode != null) {
+      deque.push(node.leftNode);
+    }
+    if (node.rightNode != null) {
+      deque.push(node.rightNode);
+    }
+
+    treeItems = breadthFirst(deque, treeItems);
+
+    return treeItems;
+
   }
 
   @Override
   public String toString() {
-
-    Stack<Node> stack = new Stack<>();
-    stack.push(root);
-    LinkedHashMap<Node, String> treeItems = new LinkedHashMap<>();
-    treeItems = toStringHelper(stack, treeItems);
-
-    StringBuilder sb = new StringBuilder();
-    Node previous = root;
-    for (Map.Entry<Node, String> entry : treeItems.entrySet()) {
-      if (entry.getKey().data.compareTo(previous.data) < 0) {
-        sb.append("\n");
-      }
-      sb.append(entry.getValue());
-      previous = entry.getKey();
-    }
-
-    return sb.toString();
+    return subTree(root.data);
   }
 
 }

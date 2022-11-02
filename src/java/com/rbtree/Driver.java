@@ -33,8 +33,7 @@ public class Driver {
     for (int i = 0; i < vals.length; i++) {
       rbTree.insert(vals[i]);
     }
-
-    System.out.print("\n");
+    System.out.println("\n");
     System.out.println(rbTree);
 
   }
