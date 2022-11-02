@@ -1,13 +1,8 @@
 package com.rbtree;
 
 import java.lang.Comparable;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Stack;
 
 /**
  * An implimentation of a red black tree i.e. a type of self balancing binary
@@ -55,14 +50,42 @@ public class RedBlackTree<T extends Comparable<T>> {
     this.nodeCount = size;
   }
 
+  /**
+   * Get the largest node.
+   * 
+   * @return the largest node in the tree
+   */
   public Node getMax() {
     Node node = root;
 
-    while (node != null) {
+    while (node.rightNode != null) {
       node = node.rightNode;
     }
 
-    return node != null ? node.parent : node;
+    return node;
+
+  }
+
+  /**
+   * Get the height of the tree.
+   * 
+   * @return the integer value of the tree height
+   */
+  public int getHeight() {
+    int height = getHeightRecurse(root, 0);
+    return height;
+  }
+
+  private int getHeightRecurse(Node node, int height) {
+
+    if (node == null) {
+      return height;
+    }
+
+    height = Math.max(getHeightRecurse(node.leftNode, height + 1),
+        getHeightRecurse(node.rightNode, height + 1));
+
+    return height;
 
   }
 
@@ -74,7 +97,7 @@ public class RedBlackTree<T extends Comparable<T>> {
    * @param data data to be inserted to the tree
    */
   public void insert(T data) {
-    size += 1;
+    nodeCount += 1;
 
     if (root == null) {
       root = new Node(data, false);
@@ -425,69 +448,86 @@ public class RedBlackTree<T extends Comparable<T>> {
   }
 
   /**
-   * Obtains a string representation of the subtree and the relationships between
-   * nodes.
+   * Using breadthFirst search, obtains a string representation of the subtree's
+   * nodes and edges.
    * 
    * @param val the root node of the subtree
-   * @return a string of node values and branches
+   * @return a string of node values and edges
    */
   public String subTree(T val) {
 
-    // Get a list of nodes as they appear left to right
     Node node = get(val);
-    ArrayDeque<Node> deque = new ArrayDeque<>();
-    deque.push(node);
-    List<Node> treeItems = new ArrayList<>();
-    treeItems = breadthFirst(deque, treeItems);
+    List<Node> currentRow = new ArrayList<>();
+    List<Node> nextRow = new ArrayList<>();
 
+    currentRow.add(node);
     int cellSize = getMax().data.toString().length();
-    int rowSize = getNodeCount();
-    String row = " ";
-
+    cellSize = cellSize + ((cellSize + 1) % 2);
+    int height = getHeight();
+    int spacing = ((int) Math.pow(2, height) - 1) / 2;
     StringBuilder sb = new StringBuilder();
-    for (Node treeItem : treeItems) {
 
-      sb.append(row.repeat((rowSize + 1) / 2));
-      String s = treeItem.red ? String.format("\u001b[31m%s\u001b[37m", treeItem.data)
-          : String.format("\u001b[31m%s\u001b[37m", treeItem.data);
-      sb.append(" ".repeat((cellSize + 1 - s.length()) / 2));
-      sb.append(s);
-      sb.append(" ".repeat((cellSize + 1 - s.length()) / 2));
-      sb.append(row.repeat((rowSize + 1) / 2));
-
-      sb.append(" ".repeat((cellSize + 1 - s.length()) / 2));
-      sb.append("|");
-      sb.append(" ".repeat((cellSize + 1 - s.length()) / 2));
-      sb.append(row.repeat((rowSize + 1) / 2));
-
-      rowSize = rowSize / 2;
-
-    }
+    sb = buildTree(currentRow, nextRow, 1, sb, cellSize, spacing);
 
     return sb.toString();
   }
 
-  private List<Node> breadthFirst(ArrayDeque<Node> deque,
-      List<Node> treeItems) {
+  private StringBuilder buildTree(List<Node> currentRow, List<Node> nextRow, int notVisited,
+      StringBuilder sb, int cellSize, int marginSize) {
 
     // Base case
-    if (deque.isEmpty()) {
-      return treeItems;
+    if (notVisited == 0) {
+      return sb;
+    }
+    notVisited = 0;
+
+    // Append Current row to string builder
+    for (int i = 0; i < currentRow.size(); i++) {
+      Node current = currentRow.get(i);
+
+      if (current != null) {
+        String s = current.red
+            ? String.format("\u001b[31m%s\u001b[37m", current.data)
+            : String.format("%s", current.data);
+
+        String leftPadding = " ".repeat(marginSize * cellSize
+            + (cellSize - current.data.toString().length()) / 2);
+        String rightPadding = " ".repeat(marginSize * cellSize
+            + (cellSize - current.data.toString().length()) / 2
+            + cellSize);
+
+        sb.append(leftPadding + s + rightPadding);
+        if (current.leftNode != null) {
+          nextRow.add(current.leftNode);
+          notVisited += 1;
+        } else {
+          nextRow.add(null);
+        }
+        if (current.rightNode != null) {
+          nextRow.add(current.rightNode);
+          notVisited += 1;
+        } else {
+          nextRow.add(null);
+        }
+      } else {
+        String s = " ".repeat(marginSize * 2 * cellSize + cellSize * 2);
+
+        sb.append(s);
+        nextRow.add(null);
+        nextRow.add(null);
+      }
     }
 
-    Node node = deque.removeLast();
-    treeItems.add(node);
+    sb.append("\n");
 
-    if (node.leftNode != null) {
-      deque.push(node.leftNode);
+    // Set up for next recursive call (next layer of the tree)
+    currentRow.clear();
+    for (Node node : nextRow) {
+      currentRow.add(node);
     }
-    if (node.rightNode != null) {
-      deque.push(node.rightNode);
-    }
+    nextRow.clear();
 
-    treeItems = breadthFirst(deque, treeItems);
-
-    return treeItems;
+    return buildTree(currentRow, nextRow, notVisited, sb, cellSize, marginSize / 2);
 
   }
 
