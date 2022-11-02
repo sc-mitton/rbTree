@@ -7,7 +7,7 @@ public class Driver {
 
     String.format("%" + 10 + "s", "Hello");
 
-    Integer[] vals = new Integer[20];
+    Integer[] vals = new Integer[30];
     RedBlackTree<Integer> rbTree = new RedBlackTree<>();
     Random rand = new Random();
     rand.setSeed(3);

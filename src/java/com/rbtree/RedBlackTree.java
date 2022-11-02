@@ -462,11 +462,12 @@ public class RedBlackTree<T extends Comparable<T>> {
     List<Node> nextRow = new ArrayList<>();
     nodeRow.add(node);
 
+    // Resources for breadthFirst
     int height = getHeight();
     int columns = (int) Math.pow(2, height) - 1;
+    height = height * 3;
     int margin = (columns) / 2;
     int cellSize = getMax().data.toString().length();
-    String defaultCell = " ".repeat(cellSize);
     String[][] table = new String[height][columns];
     for (int i = 0; i < height; i++) {
       for (int j = 0; j < columns; j++) {
@@ -477,7 +478,7 @@ public class RedBlackTree<T extends Comparable<T>> {
     table = breadthFirst(nodeRow, nextRow, table, 1, margin, 0, cellSize);
 
     StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < height; i++) {
+    for (int i = 0; i < height - 2; i++) {
       for (int j = 0; j < columns; j++) {
         sb.append(table[i][j]);
         if (j == columns - 1) {
@@ -510,6 +511,28 @@ public class RedBlackTree<T extends Comparable<T>> {
 
         table[row][column] = s + " ".repeat(cellSize - n.data.toString().length());
 
+        // Add branches
+        if (n.leftNode != null | n.rightNode != null) {
+          table[row + 1][column] = "|" + " ".repeat(cellSize - 1);
+        }
+        if (n.leftNode != null) {
+          for (int k = column - 1; k >= column - margin / 2; k--) {
+            table[row + 2][k] = "-".repeat(cellSize);
+          }
+        }
+        if (n.rightNode != null) {
+          for (int k = column; k < column + margin / 2 + 1; k++) {
+            table[row + 2][k] = "-".repeat(cellSize);
+          }
+        }
+        if (row > 0) {
+          if (n.parent.rightNode == n) {
+            table[row - 1][column] = "-".repeat(cellSize - 1) + "+";
+          } else if (n.parent.leftNode == n) {
+            table[row - 1][column] = "+" + "-".repeat(cellSize - 1);
+          }
+        }
+
         nextRow.add(n.leftNode);
         nextRow.add(n.rightNode);
         if (n.leftNode != null) {
@@ -528,12 +551,16 @@ public class RedBlackTree<T extends Comparable<T>> {
 
     // Set up for next recursive call
     nodeRow.clear();
-    for (Node node : nextRow) {
+    for (
+
+    Node node : nextRow) {
       nodeRow.add(node);
     }
     nextRow.clear();
 
-    return breadthFirst(nodeRow, nextRow, table, notVisited, margin / 2, row + 1, cellSize);
+    return
+
+    breadthFirst(nodeRow, nextRow, table, notVisited, margin / 2, row + 3, cellSize);
 
   }
 
