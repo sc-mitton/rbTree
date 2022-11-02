@@ -5,12 +5,9 @@ import java.util.Random;
 public class Driver {
   public static void main(String[] args) {
 
-    String.format("%" + 10 + "s", "Hello");
-
     Integer[] vals = new Integer[30];
     RedBlackTree<Integer> rbTree = new RedBlackTree<>();
     Random rand = new Random();
-    rand.setSeed(3);
 
     // Insert vals to array buffer
     for (Integer i = 0; i < vals.length; i++) {
@@ -35,6 +32,7 @@ public class Driver {
     for (int i = 0; i < vals.length; i++) {
       rbTree.insert(vals[i]);
     }
+
     System.out.println("\n");
     System.out.println(rbTree);
 
