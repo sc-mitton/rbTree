@@ -2,6 +2,7 @@ package com.rbtree;
 
 import java.lang.Comparable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -457,77 +458,82 @@ public class RedBlackTree<T extends Comparable<T>> {
   public String subTree(T val) {
 
     Node node = get(val);
-    List<Node> currentRow = new ArrayList<>();
+    List<Node> nodeRow = new ArrayList<>();
     List<Node> nextRow = new ArrayList<>();
+    nodeRow.add(node);
 
-    currentRow.add(node);
-    int cellSize = getMax().data.toString().length();
-    cellSize = cellSize + ((cellSize + 1) % 2);
     int height = getHeight();
-    int spacing = ((int) Math.pow(2, height) - 1) / 2;
-    StringBuilder sb = new StringBuilder();
+    int columns = (int) Math.pow(2, height) - 1;
+    int margin = (columns) / 2;
+    int cellSize = getMax().data.toString().length();
+    String defaultCell = " ".repeat(cellSize);
+    String[][] table = new String[height][columns];
+    for (int i = 0; i < height; i++) {
+      for (int j = 0; j < columns; j++) {
+        table[i][j] = " ".repeat(cellSize);
+      }
+    }
 
-    sb = buildTree(currentRow, nextRow, 1, sb, cellSize, spacing);
+    table = breadthFirst(nodeRow, nextRow, table, 1, margin, 0, cellSize);
+
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < height; i++) {
+      for (int j = 0; j < columns; j++) {
+        sb.append(table[i][j]);
+        if (j == columns - 1) {
+          sb.append("\n");
+        }
+      }
+    }
 
     return sb.toString();
   }
 
-  private StringBuilder buildTree(List<Node> currentRow, List<Node> nextRow, int notVisited,
-      StringBuilder sb, int cellSize, int marginSize) {
+  private String[][] breadthFirst(List<Node> nodeRow, List<Node> nextRow, String[][] table,
+      int notVisited, int margin, int row, int cellSize) {
 
     // Base case
     if (notVisited == 0) {
-      return sb;
+      return table;
     }
     notVisited = 0;
 
-    // Append Current row to string builder
-    for (int i = 0; i < currentRow.size(); i++) {
-      Node current = currentRow.get(i);
+    int column = 0;
+    for (int i = 0; i < nodeRow.size(); i++) {
+      Node n = nodeRow.get(i);
+      column = column + margin;
 
-      if (current != null) {
-        String s = current.red
-            ? String.format("\u001b[31m%s\u001b[37m", current.data)
-            : String.format("%s", current.data);
+      if (n != null) {
+        String s = n.red
+            ? String.format("\u001b[31m%s\u001b[37m", n.data)
+            : String.format("%s", n.data);
 
-        String leftPadding = " ".repeat(marginSize * cellSize
-            + (cellSize - current.data.toString().length()) / 2);
-        String rightPadding = " ".repeat(marginSize * cellSize
-            + (cellSize - current.data.toString().length()) / 2
-            + cellSize);
+        table[row][column] = s + " ".repeat(cellSize - n.data.toString().length());
 
-        sb.append(leftPadding + s + rightPadding);
-        if (current.leftNode != null) {
-          nextRow.add(current.leftNode);
+        nextRow.add(n.leftNode);
+        nextRow.add(n.rightNode);
+        if (n.leftNode != null) {
           notVisited += 1;
-        } else {
-          nextRow.add(null);
         }
-        if (current.rightNode != null) {
-          nextRow.add(current.rightNode);
+        if (n.rightNode != null) {
           notVisited += 1;
-        } else {
-          nextRow.add(null);
         }
       } else {
-        String s = " ".repeat(marginSize * 2 * cellSize + cellSize * 2);
-
-        sb.append(s);
         nextRow.add(null);
         nextRow.add(null);
       }
+
+      column = column + margin + 2;
     }
 
-    sb.append("\n");
-
-    // Set up for next recursive call (next layer of the tree)
-    currentRow.clear();
+    // Set up for next recursive call
+    nodeRow.clear();
     for (Node node : nextRow) {
-      currentRow.add(node);
+      nodeRow.add(node);
     }
     nextRow.clear();
 
-    return buildTree(currentRow, nextRow, notVisited, sb, cellSize, marginSize / 2);
+    return breadthFirst(nodeRow, nextRow, table, notVisited, margin / 2, row + 1, cellSize);
 
   }
 

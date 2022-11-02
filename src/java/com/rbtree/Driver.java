@@ -5,10 +5,12 @@ import java.util.Random;
 public class Driver {
   public static void main(String[] args) {
 
-    Integer[] vals = new Integer[24];
+    String.format("%" + 10 + "s", "Hello");
+
+    Integer[] vals = new Integer[20];
     RedBlackTree<Integer> rbTree = new RedBlackTree<>();
     Random rand = new Random();
-    // rand.setSeed(3);
+    rand.setSeed(3);
 
     // Insert vals to array buffer
     for (Integer i = 0; i < vals.length; i++) {
