@@ -232,10 +232,6 @@ public class RedBlackTree<T extends Comparable<T>> {
     if (node == null) {
       return;
     }
-    if (node.parent == null) {
-      root = null;
-      return;
-    }
 
     if (node.rightNode == null & node.leftNode == null) {
       // Case 1: node is a leaf node and thus has no children
@@ -266,12 +262,13 @@ public class RedBlackTree<T extends Comparable<T>> {
     } else if (node.rightNode != null) {
       deleteFix(node.rightNode, false);
     } else if (node.red) {
-      deleteFix(node, false);
+      deleteFix(node.leftNode, false);
     } else {
       deleteFix(node, true);
     }
 
     node = null; // Delete for good
+    return;
   }
 
   private void deleteFix(Node u, boolean db) {
@@ -551,9 +548,7 @@ public class RedBlackTree<T extends Comparable<T>> {
 
     // Set up for next recursive call
     nodeRow.clear();
-    for (
-
-    Node node : nextRow) {
+    for (Node node : nextRow) {
       nodeRow.add(node);
     }
     nextRow.clear();
